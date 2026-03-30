@@ -42,11 +42,11 @@ template_restaurantes = PromptTemplate(
     {formato_de_saida}
     """,
     partial_variables={"formato_de_saida": parseador_restaurantes.get_format_instructions()},
-)
+) # type: ignore
 
 template_cultural = PromptTemplate(
     template="Sugira atividades e locais culturais em {cidade}"
-)
+) # type: ignore
 
 modelo = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash-lite",
