@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader, PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
@@ -16,9 +16,11 @@ model = ChatGoogleGenerativeAI(
 )
 
 embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-2-preview") 
-documento = TextLoader("documentos/GTB_gold_Nov23.txt", encoding="utf-8").load()
+arquivos = ["documentos/GTB_gold_Nov23.pdf", "documentos/GTB_platinum_Nov23.pdf", "documentos/GTB_standard_Nov23.pdf"]
 
-pedacos = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200).split_documents(documento)
+documentos = sum([PyPDFLoader(arquivo).load() for arquivo in arquivos], [])
+
+pedacos = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200).split_documents(documentos)
 
 dados_recuperados = FAISS.from_documents(pedacos, embeddings).as_retriever(search_kwargs={"k": 2})
 
@@ -36,4 +38,4 @@ def responder(pergunta: str):
     contexto = "\n\n".join([trecho.page_content for trecho in trechos])
     return cadeia.invoke({"query": pergunta, "contexto": contexto})
 
-print(responder("Como devo proceder caso tenha um item roubado?"))
+print(responder("Como devo proceder caso tenha um item comprado roubado e sabendo que tenho o cartão gold?"))
