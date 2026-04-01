@@ -43,7 +43,7 @@ prompt_roteador = ChatPromptTemplate.from_messages(
     ]
 )
 
-roteador = prompt_roteador | model.with_structured_output(Rota)
+roteador = prompt_roteador | model.with_structured_output(Rota) # type: ignore
 
 class Estado(TypedDict):
     query: str
@@ -52,26 +52,26 @@ class Estado(TypedDict):
 
 async def no_roteador(estado: Estado, config=RunnableConfig):
     return {
-        "destino": await roteador.ainvoke({"query": estado["query"]}, config)
+        "destino": await roteador.ainvoke({"query": estado["query"]}, config) # type: ignore
     }
 
 async def no_praia(estado: Estado, config=RunnableConfig):
     return {
-        "resposta": await chain_praia.ainvoke({"query": estado["query"]}, config)
+        "resposta": await chain_praia.ainvoke({"query": estado["query"]}, config) # type: ignore
     }
 
 async def no_montanha(estado: Estado, config=RunnableConfig):
     return {
-        "resposta": await chain_montanha.ainvoke({"query": estado["query"]}, config)
+        "resposta": await chain_montanha.ainvoke({"query": estado["query"]}, config) # type: ignore
     }
 
 def escolher_chain(estado: Estado)->Literal["praia", "montanha"]:
     return estado["destino"]["destino"]
 
 grafo = StateGraph(Estado)
-grafo.add_node("rotear", no_roteador)
-grafo.add_node("praia", no_praia)
-grafo.add_node("montanha", no_montanha)
+grafo.add_node("rotear", no_roteador) # type: ignore
+grafo.add_node("praia", no_praia) # type: ignore
+grafo.add_node("montanha", no_montanha) # type: ignore
 
 grafo.add_edge(START, "rotear")
 grafo.add_conditional_edges("rotear", escolher_chain)
@@ -82,7 +82,7 @@ app = grafo.compile()
 
 async def main():
     query = "Quero visitar um lugar no Brasil, famoso por praias e cultura."
-    resposta = await app.ainvoke({"query": query})
+    resposta = await app.ainvoke({"query": query}) # type: ignore
     print(resposta)
 
 asyncio.run(main())
